@@ -14,6 +14,10 @@ class MoviesPage extends Component {
     };
   }
 
+  componentDidMount() {
+    this.getMovies();
+  }
+
   getMovies = async () => {
     try {
       this.setState({isLoading: true});
@@ -41,7 +45,6 @@ class MoviesPage extends Component {
     const {peliculas, isLoading} = this.state;
     return (
       <View>
-        <Button title="OBTENER PELICULAS" onPress={this.getMovies} />
         <FlatList
           data={peliculas}
           renderItem={({item}) => (
