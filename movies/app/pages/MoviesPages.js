@@ -1,24 +1,64 @@
 import React, {Component} from 'react';
-import {Text, Button, Alert} from 'react-native';
+import {Button, Alert, FlatList, View, RefreshControl} from 'react-native';
 import MoviesService from '../net/MoviesService';
+import ItemMovie from '../components/ItemMovie';
 
 class MoviesPage extends Component {
   service = new MoviesService();
 
-  componentDidMount() {}
+  constructor(props) {
+    super(props);
+    this.state = {
+      peliculas: [],
+      isLoading: false,
+    };
+  }
 
   getMovies = async () => {
     try {
+      this.setState({isLoading: true});
       let result = await this.service.getMovies();
-      Alert.alert('Peliculas', JSON.stringify(result));
+
+      this.setState({peliculas: result});
+      this.setState({isLoading: false});
     } catch (err) {
       Alert.alert('Peliculas', JSON.stringify(err));
+      this.setState({isLoading: false});
     }
-    //alert('getMovies');
+  };
+
+  onRefresh = () => {
+    this.getMovies();
+  };
+
+  onPressItem = item => {
+    this.props.navigation.navigate('Detail', {
+      movie: item,
+    });
   };
 
   render() {
-    return <Button title="OBTENER PELICULAS" onPress={this.getMovies} />;
+    const {peliculas, isLoading} = this.state;
+    return (
+      <View>
+        <Button title="OBTENER PELICULAS" onPress={this.getMovies} />
+        <FlatList
+          data={peliculas}
+          renderItem={({item}) => (
+            <ItemMovie
+              item={item}
+              onPressItem={() => {
+                this.onPressItem(item);
+              }}
+            />
+          )}
+          keyExtractor={item => item.Title}
+          refreshControl={
+            <RefreshControl refreshing={isLoading} onRefresh={this.onRefresh} />
+          }
+        />
+      </View>
+    );
   }
 }
 
